@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="คำนวณ String">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#e8813f">
+<title>คำนวณ String</title>
+<link rel="manifest" href="data:application/manifest+json,{%22name%22:%22คำนวณ%20String%22,%22short_name%22:%22String%20Calc%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23faf6f2%22,%22theme_color%22:%22%23e8813f%22}">
+<style>
+  :root{
+    --orange-dark:#7a3a1f;
+    --orange-mid:#c4562a;
+    --orange-btn:#e8813f;
+    --orange-btn-hover:#d66f2e;
+    --bg-panel:#fbe8d9;
+    --bg-page:#faf6f2;
+    --white:#ffffff;
+    --text-dark:#2d211f;
+    --text-muted:#8a6f63;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:"Sarabun","Noto Sans Thai",-apple-system,sans-serif;
+    background:var(--bg-page);
+    padding:24px 12px calc(24px + env(safe-area-inset-bottom));
+    padding-top:calc(24px + env(safe-area-inset-top));
+    color:var(--text-dark);
+  }
+  .wrap{max-width:760px;margin:0 auto;}
+  .card{
+    background:linear-gradient(180deg,var(--bg-panel),#f6d5b8);
+    border-radius:20px;
+    padding:28px 22px;
+    box-shadow:0 8px 24px rgba(122,58,31,0.10);
+  }
+  @media(min-width:600px){ .card{padding:40px 36px;} }
+  h1{
+    text-align:center;
+    color:var(--orange-dark);
+    font-size:22px;
+    margin:0 0 6px;
+  }
+  @media(min-width:600px){ h1{font-size:26px;} }
+  .subtitle{
+    text-align:center;
+    color:var(--orange-mid);
+    font-size:13px;
+    margin:0 0 24px;
+  }
+  .row{
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+  }
+  .col{flex:1;min-width:150px;}
+  label.field-label{
+    display:block;
+    font-size:13px;
+    font-weight:600;
+    color:var(--text-dark);
+    margin-bottom:8px;
+  }
+  .input-suffix{ position:relative; }
+  .input-suffix span{
+    position:absolute;
+    right:14px;
+    top:50%;
+    transform:translateY(-50%);
+    font-size:13px;
+    color:var(--text-muted);
+    pointer-events:none;
+  }
+  input[type="number"]{
+    width:100%;
+    padding:12px 14px;
+    border:1px solid #ecd9c8;
+    border-radius:10px;
+    font-size:16px;
+    font-family:inherit;
+    background:var(--white);
+    outline:none;
+  }
+  input[type="number"]:focus{border-color:var(--orange-btn);}
+  .calc-btn{
+    display:block;
+    width:100%;
+    margin:0 auto;
+    padding:16px 48px;
+    background:var(--orange-btn);
+    color:#fff;
+    border:none;
+    border-radius:12px;
+    font-size:16px;
+    font-weight:600;
+    font-family:inherit;
+    cursor:pointer;
+    transition:background .15s ease;
+  }
+  @media(min-width:600px){ .calc-btn{width:auto;padding:14px 48px;} }
+  .calc-btn:hover, .calc-btn:active{background:var(--orange-btn-hover);}
+
+  .result-wrap{
+    max-width:640px;
+    margin:0 auto;
+    position:relative;
+    margin-top:8px;
+  }
+  .connector{
+    width:1px;
+    height:24px;
+    background:#e6c7ab;
+    margin:0 auto;
+  }
+  .result-badge{
+    text-align:center;
+    margin-bottom:-18px;
+    position:relative;
+    z-index:2;
+  }
+  .result-badge span{
+    background:var(--orange-dark);
+    color:#fff;
+    padding:10px 28px;
+    border-radius:24px;
+    font-size:14px;
+    font-weight:600;
+    display:inline-block;
+  }
+  .result-card{
+    background:var(--bg-panel);
+    border-radius:16px;
+    padding:30px 16px 20px;
+  }
+  @media(min-width:600px){ .result-card{padding:30px 24px 20px;} }
+
+  .section-title{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:14px;
+    font-weight:700;
+    margin:22px 0 10px;
+    padding:8px 12px;
+    border-radius:8px;
+  }
+  .section-title:first-child{margin-top:0;}
+  .section-title .icon{font-size:16px;}
+  .section-title.general{
+    color:var(--orange-dark);
+    background:transparent;
+    padding:0;
+  }
+  .section-title.optimizer{
+    color:#fff;
+    background:linear-gradient(135deg,#3f7fd6,#2f5fb8);
+  }
+  .section-title.pv{
+    color:#fff;
+    background:linear-gradient(135deg,#3aa86b,#268049);
+  }
+
+  .result-line{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    background:var(--white);
+    border-radius:10px;
+    padding:14px 16px;
+    margin-bottom:10px;
+    font-size:13px;
+  }
+  .result-value{
+    background:var(--orange-dark);
+    color:#fff;
+    font-weight:700;
+    padding:6px 14px;
+    border-radius:6px;
+    font-size:15px;
+    min-width:60px;
+    text-align:center;
+    white-space:nowrap;
+  }
+  .result-unit{color:var(--text-muted);white-space:nowrap;}
+
+  .table-card{
+    border-radius:10px;
+    padding:12px;
+    margin-bottom:10px;
+  }
+  .table-card.optimizer{
+    background:#eaf1fc;
+    border:1px solid #cfe0f7;
+  }
+  .table-card.pv{
+    background:#e9f6ee;
+    border:1px solid #c9e8d4;
+  }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:12.5px;
+  }
+  table th{
+    text-align:center;
+    padding:8px 4px;
+    font-size:12px;
+  }
+  .table-card.optimizer th{ color:#2f5fb8; border-bottom:2px solid #cfe0f7; }
+  .table-card.pv th{ color:#268049; border-bottom:2px solid #c9e8d4; }
+  table td{
+    text-align:center;
+    padding:10px 4px;
+  }
+  .table-card.optimizer td{ border-bottom:1px solid #dbe8f9; }
+  .table-card.pv td{ border-bottom:1px solid #d7edde; }
+  table tr:last-child td{
+    border-bottom:none;
+    font-weight:700;
+    border-radius:8px;
+  }
+  .table-card.optimizer tr:last-child td{ color:#fff; background:#3f7fd6; }
+  .table-card.pv tr:last-child td{ color:#fff; background:#3aa86b; }
+
+  .install-hint{
+    max-width:640px;
+    margin:0 auto 18px;
+    background:var(--white);
+    border:1px dashed #e6b98d;
+    border-radius:12px;
+    padding:12px 16px;
+    font-size:12px;
+    color:var(--text-muted);
+    text-align:center;
+    line-height:1.6;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="install-hint" id="installHint">
+    📲 เปิดในมือถือ แล้วกดเมนูเบราว์เซอร์ → "เพิ่มลงหน้าจอโฮม" (Add to Home Screen) เพื่อใช้งานเหมือนแอปได้เลย
+  </div>
+
+  <div class="card">
+    <h1>คำนวณ String</h1>
+    <p class="subtitle">คำนวณจำนวน String, พิกัดระบบ และจำนวน Optimizer / PV ที่ต้องใช้</p>
+
+    <div class="row">
+      <div class="col">
+        <label class="field-label">จำนวนแผง</label>
+        <div class="input-suffix">
+          <input type="number" id="panelCount" placeholder="เช่น 300" min="0" step="1" inputmode="numeric">
+          <span>แผง</span>
+        </div>
+      </div>
+      <div class="col">
+        <label class="field-label">จำนวน Inverter</label>
+        <input type="number" id="invCount" placeholder="เช่น 1" min="0" step="1" inputmode="numeric">
+      </div>
+      <div class="col">
+        <label class="field-label">MPPT ต่อ Inverter</label>
+        <input type="number" id="mpptCount" placeholder="เช่น 6" min="0" step="1" inputmode="numeric">
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <label class="field-label">พิกัด Inverter</label>
+        <div class="input-suffix">
+          <input type="number" id="invKW" placeholder="เช่น 50" min="0" step="1" inputmode="decimal">
+          <span>kW</span>
+        </div>
+      </div>
+      <div class="col">
+        <label class="field-label">พิกัดแผง</label>
+        <div class="input-suffix">
+          <input type="number" id="panelW" placeholder="เช่น 720" min="0" step="10" inputmode="decimal">
+          <span>W</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="calc-btn" id="calcBtn">คำนวณ</button>
+  </div>
+
+  <div class="result-wrap">
+    <div class="connector"></div>
+    <div class="result-badge"><span>ผลการคำนวณ</span></div>
+    <div class="result-card">
+
+      <div class="section-title general">📊 ข้อมูลทั่วไป</div>
+      <div class="result-line">
+        <span>String ทั้งหมด</span>
+        <span class="result-value" id="totalString">–</span>
+        <span class="result-unit">string</span>
+      </div>
+      <div class="result-line">
+        <span>แผงต่อ String</span>
+        <span class="result-value" id="panelPerString">–</span>
+        <span class="result-unit">แผง</span>
+      </div>
+      <div class="result-line">
+        <span>พิกัดระบบ</span>
+        <span class="result-value" id="systemKWp">–</span>
+        <span class="result-unit">kWp</span>
+      </div>
+      <div class="result-line">
+        <span>Inverter Oversizing</span>
+        <span class="result-value" id="oversizing">–</span>
+        <span class="result-unit">เท่า</span>
+      </div>
+
+      <div class="section-title optimizer"><span class="icon">🔵</span> กรณีใช้ Optimizer แบบ 2:1</div>
+      <div class="table-card optimizer">
+        <table>
+          <thead>
+            <tr><th>Optimizer (ตัว) / String</th><th>จำนวน String</th></tr>
+          </thead>
+          <tbody id="optTableBody">
+            <tr><td colspan="2">กรอกข้อมูลแล้วกดคำนวณ</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-title pv"><span class="icon">🟢</span> กรณีใช้ PV module แบบ 1:1</div>
+      <div class="table-card pv">
+        <table>
+          <thead>
+            <tr><th>PV (แผง) / String</th><th>จำนวน String</th></tr>
+          </thead>
+          <tbody id="pvTableBody">
+            <tr><td colspan="2">กรอกข้อมูลแล้วกดคำนวณ</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const panelCount = document.getElementById('panelCount');
+  const invCount = document.getElementById('invCount');
+  const mpptCount = document.getElementById('mpptCount');
+  const invKW = document.getElementById('invKW');
+  const panelW = document.getElementById('panelW');
+  const calcBtn = document.getElementById('calcBtn');
+
+  const totalStringEl = document.getElementById('totalString');
+  const panelPerStringEl = document.getElementById('panelPerString');
+  const systemKWpEl = document.getElementById('systemKWp');
+  const oversizingEl = document.getElementById('oversizing');
+  const optTableBody = document.getElementById('optTableBody');
+  const pvTableBody = document.getElementById('pvTableBody');
+
+  function fmt(n, decimals){
+    if (!isFinite(n)) return '0';
+    const rounded = Math.round(n * Math.pow(10, decimals)) / Math.pow(10, decimals);
+    return rounded.toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: decimals });
+  }
+
+  // Excel-equivalent helpers
+  function excelMod1(x){ return x - Math.trunc(x); }     // MOD(x,1) for x >= 0
+  function excelTrunc(x){ return Math.trunc(x); }
+  function excelRoundUp(x){                              // ROUNDUP(x,0)
+    return x >= 0 ? Math.ceil(x) : Math.floor(x);
+  }
+
+  function calculate(){
+    // ===== raw inputs (matches C7, D7, E7, D9, D10) =====
+    const C7 = parseFloat(panelCount.value) || 0;   // จำนวนแผง
+    const D7 = parseFloat(invCount.value) || 0;      // In.v (จำนวน inverter)
+    const E7 = parseFloat(mpptCount.value) || 0;     // MPPT
+    const D9 = parseFloat(invKW.value) || 0;         // In.v KW
+    const D10 = parseFloat(panelW.value) || 0;       // แผง W
+
+    // ===== ข้อมูลทั่วไป =====
+    const F7 = D7 * E7;                              // string ทั้งหมด
+    const G7 = F7 !== 0 ? C7 / F7 : 0;                // แผง/string
+    const D13 = (D10 * C7) / 1000;                    // พิกัด (kWp)
+    const D12 = (D9 * D7) !== 0 ? D13 / (D9 * D7) : 0; // In.v Oversizing
+
+    totalStringEl.textContent = fmt(F7, 0);
+    panelPerStringEl.textContent = fmt(G7, 2);
+    systemKWpEl.textContent = fmt(D13, 2);
+    oversizingEl.textContent = fmt(D12, 2);
+
+    // ===== Optimizer 2:1 (I6, H7, H9, H10, F9, J9, K9, J10, K10, J11, K11, K12) =====
+    const I6 = G7 / 2;
+    const H7 = I6;
+    const H9 = excelTrunc(H7);
+    const H10 = excelMod1(H7);
+    const F9 = H10 * F7;
+    const J9 = H9;
+    const K9 = excelRoundUp(H9 + H10);
+    const J10 = F7 - F9;
+    const K10 = F9;
+    const J11 = J9 * J10;
+    const K11 = K9 * K10;
+    const optTotal = J11 + K11;
+
+    optTableBody.innerHTML = '';
+    if (K10 > 0.0001) {
+      optTableBody.innerHTML += `<tr><td>${fmt(J9,0)}</td><td>${fmt(J10,2)}</td></tr>`;
+      optTableBody.innerHTML += `<tr><td>${fmt(K9,0)}</td><td>${fmt(K10,2)}</td></tr>`;
+    } else {
+      optTableBody.innerHTML += `<tr><td>${fmt(J9,0)}</td><td>${fmt(J10,2)}</td></tr>`;
+    }
+    optTableBody.innerHTML += `<tr><td colspan="2">รวม ${fmt(optTotal,0)} Optimizer</td></tr>`;
+
+    // ===== PV module 1:1 (H15, H16, J15, K15, J16, K16, J17, K17, K18) =====
+    const H15 = excelTrunc(G7);
+    const H16 = excelMod1(G7);
+    const J15 = H15;
+    const K15 = excelRoundUp(H15 + H16);
+    const K16 = H16 * F7;
+    const J16 = F7 - K16;
+    const J17 = J15 * J16;
+    const K17 = K15 * K16;
+    const pvTotal = J17 + K17;
+
+    pvTableBody.innerHTML = '';
+    if (K16 > 0.0001) {
+      pvTableBody.innerHTML += `<tr><td>${fmt(J15,0)}</td><td>${fmt(J16,2)}</td></tr>`;
+      pvTableBody.innerHTML += `<tr><td>${fmt(K15,0)}</td><td>${fmt(K16,2)}</td></tr>`;
+    } else {
+      pvTableBody.innerHTML += `<tr><td>${fmt(J15,0)}</td><td>${fmt(J16,2)}</td></tr>`;
+    }
+    pvTableBody.innerHTML += `<tr><td colspan="2">รวม ${fmt(pvTotal,0)} แผง</td></tr>`;
+  }
+
+  calcBtn.addEventListener('click', calculate);
+
+  if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+    document.getElementById('installHint').style.display = 'none';
+  }
+</script>
+</body>
+</html>
